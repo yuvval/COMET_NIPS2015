@@ -1,0 +1,98 @@
+\documentclass{article} % For LaTeX2e
+\usepackage{nips15submit_e,times}
+\usepackage{hyperref}
+\usepackage{url}
+%\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
+%% COMET packages
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{hyperref}
+
+%% cross reference the main document as N-
+\usepackage{xr}
+\externaldocument{comet_main_NIPS}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+%% packeges from ICML
+% use Times
+\usepackage{times}
+\usepackage{graphicx} % more modern
+\usepackage{subfigure} 
+\usepackage{amsthm}
+\usepackage{natbib}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{hyperref}
+%\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+%%%% COMET commands %%%%
+\newcommand\todo[1]{\textbf{<ToDo:#1}!}
+%\newcommand\mat[1]{\mathcal{#1}}
+%\newcommand\mat[1]{\boldmath{#1}}
+\newcommand\mat[1]{{#1}}
+\renewcommand\vec[1]{\mathbf{#1}}
+\newcommand{\T}{{}^\mathsf{T}}
+\newcommand{\W}{\mat{W}}
+\newcommand{\E}{\mat{E}}
+\newcommand{\Hh}{\mat{H}}
+\newcommand{\Pp}{\mat{P}}
+\newcommand{\newW}{{\mat{W^{new}}}}
+\newcommand{\eqdef}{\doteq}
+\newcommand{\Rd}{\mathbb{R}^d}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\tL}{\tilde{L}(\W)}
+\newcommand{\frobsq}[1]{{\|#1\|_F^2}}
+\newcommand{\frob}[1]{{\|#1\|_F}} 
+\newcommand{\ignore}[1]{}
+
+\newcommand{\q}{{\vec{q}}}
+\newcommand{\p}{{\vec{p}}}
+\newcommand{\trip}{{t}}
+\newcommand{\qt}{{\q_{\trip}}}
+\newcommand{\pt}{{\p_{\trip}}}
+\newcommand{\triplet}{(\qt, \pt^{+}, \pt^{-})}
+
+
+\newcommand{\A}{A}
+\newcommand{\B}{\vec{b}}
+\newcommand{\C}{c}
+\newcommand{\invA}{A^{-1}}
+
+\newcommand{\grd}{\frac{\partial \tL}{\W}}
+\newcommand{\grdkl}{\frac{\partial \tL}{\W_{kl}}}
+
+
+\newcommand{\uscalar}{{u}_{1}}
+\newcommand{\uvec}{\vec{u}_{2:d}} 
+\newcommand{\Wvec}{\W_{2:d,1}}
+\newcommand{\Wscalar}{\W_{1,1}}
+
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+\newtheorem{apptheorem}{Theorem}
+\newtheorem{applemma}{Lemma}
+
+\renewcommand{\eqref}[1]{Eq.~(\ref{#1})}
+\newcommand{\figref}[1]{Fig.~\ref{#1}}
+\newcommand{\secref}[1]{Sec.~\ref{#1}}
+\newcommand{\tabref}[1]{Table~\ref{#1}}
+
+%\DeclareMathOperator*{\argmin}{arg\,min}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\section{Metric Learning One Feature at a Time, Supplementary Material}
+\subsection{TBD}
+TBD \eqref{updateEq} TBD
+\subsection{TBD}
+TBD
+\end{document}
+
+
