@@ -11,6 +11,14 @@
 \usepackage[square,numbers]{natbib}
 \bibliographystyle{unsrtnat}
 
+%% For inserting 2 images in a row
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{floatrow}%
+
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% packeges from ICML
 % use Times
@@ -207,24 +215,23 @@ where $l_{\W}$ is any of the triplet loss functions, $\frob{\W}$ is the Frobeniu
 Previous metric learning approaches \cite{OASIS, qianHD, qian}, solved the constrained optimization problem by SGD or stochastic mini-batch gradient steps, while repeatedly projecting back to the convex cone of PD matrices. This projection amounts to solving an eigendecomposition problem and is therefore costly in runtime.
 
 An alternative approach is to use a log-barrier term to avoid projecting onto the PD cone \cite{davis2007information,lego}. The log-barrier term for the PD cone is $- \log \det (\W)$. This gives us the following optimization problem:
-
-\begin{multline}
+\begin{equation}
 \label{eq-logdet-loss}
-  L(W) = 
-  \min_{\W} \sum_{\trip \in T}  l_{\W}(\qt, \pt^+, \pt^-) \\ - \alpha \log \det(\W) + \frac{\beta}{2} \frobsq{\W}
-\end{multline}
+L(W) = 
+  \min_{\W} \sum_{\trip \in T}  l_{\W}(\qt, \pt^+, \pt^-) - \alpha \log \det(\W) + \frac{\beta}{2} \frobsq{\W}
+\end{equation}
 where $\alpha$ is a hyper-parameter that determines the weight of the
 $\log \det$ barrier term.
 
 
 The loss in \eqref{eq-logdet-loss} can be minimized using gradient descent (GD), computing the gradient w.r.t. $\W$ for a set of triplets
-\begin{multline}
+\begin{equation}
   \frac{\partial {L (\W)}}{\partial \W} = \sum\limits_{t\in T}{\{
   [\tfrac{1}{2}[\q_{t}\Delta\p_{t}\T + \Delta\p_{t}\q_{t}\T]  }
-  {l'}\triplet\} \\- \alpha \W^{-1} + \beta \W
-%  (\lambda_{W}^t(\W))\} \\- \alpha \W^{-1} + \beta \W
+  {l'}\triplet\} - \alpha \W^{-1} + \beta \W
   \label{gradMtx}
-\end{multline}
+\end{equation}
+
 %{l'}(\lambda_{t}^{\W})
 %where $l'(x) \eqdef \frac{\partial {l(x)}}{\partial x}$, $\Delta\vec{p}_{t} \eqdef (\vec{p}_{t}^{-} - \vec{p}_{t}^{+})$
 where $\Delta\p_t = \p_t^- - \p_t^+$, and $l'(x) \eqdef \frac{d{l(x)}}{dx}$ is the outer derivative of the loss function (see Appendix A for derivation of the triplet loss). For example, for the hinge-loss, 
@@ -309,19 +316,18 @@ Now let $\uscalar = \C^* - \C$ and $\uvec = \B^* - \B$ be the updated scalar and
 obtained from $\eta G = \newW - \W$. We expand \eqref{schurCond} and
 \eqref{gradMtx} (with $k=1$) yielding a necessary and sufficient condition for $\newW \succ 0$
 \begin{equation}
-  \begin{array}{ll} 
-    (\Wscalar + 2\eta \uscalar) \\
-    -(\Wvec + \eta \uvec)\T \invA (\Wvec + \eta \uvec)  & > 0.
-  \end{array}
+    (\Wscalar + 2\eta \uscalar)
+    -(\Wvec + \eta \uvec)\T \invA (\Wvec + \eta \uvec)   > 0.
   \label{PDUpdateCondNonSimpl}
 \end{equation}
 Grouping \eqref{PDUpdateCondNonSimpl} as a quadratic inequality in $\eta$, and using the notation from \eqref{schurNotationPreUpdate} we have
-\begin{multline}
+\begin{equation}
 \label{PDUpdateCondQuadForm}
 (\uvec\T \invA \uvec) \, \eta^2 
-\\-2(\uscalar - \uvec\T \invA \B) \,\eta 
+-2(\uscalar - \uvec\T \invA \B) \,\eta 
 -(\C - \B\T  \invA \B) < 0 
-\end{multline}
+\end{equation}
+
 
 %\begin{equation}
 %  \begin{array}{ll} 
@@ -389,11 +395,10 @@ To guarantee the numerical stability we took two measures: (a) We introduced the
 We evaluate the computational complexity of a single coordinate step \eqref{gradMtx}, including the computation of the gradient and updating of $\W$, $\W^{-1}$ and $\invA$.
 
 Consider first the computation of the gradient. For the hinge-loss case $l^{h}_W$, each element $\delta_{i,j}$ of the gradient matrix \eqref{gradMtx} equals
-\begin{multline}
-    \delta_{(i,j)} = \sum\limits_{t\in T}{ [\tfrac{1}{2}[(\vec{q}_{t})_i(\Delta\vec{p}_{t}\T)_j + (\Delta\vec{p}_{t}\T)_i(\vec{q}_{t})_j\T] } \cdot \textbf{1}(\lambda_{W}^t)  \\ 
- - \alpha \cdot \W^{-1}_{i,j} + \beta \cdot \W_{i,j},
+\begin{equation}
+    \delta_{(i,j)} = \sum\limits_{t\in T}{ [\tfrac{1}{2}[(\vec{q}_{t})_i(\Delta\vec{p}_{t}\T)_j + (\Delta\vec{p}_{t}\T)_i(\vec{q}_{t})_j\T] } \cdot \textbf{1}(\lambda_{W}^t) - \alpha \cdot \W^{-1}_{i,j} + \beta \cdot \W_{i,j},
 \label{gradMatElem}
-\end{multline}
+\end{equation}
 where $\lambda_{W}^t \eqdef 1+\qt\T \W \Delta\p_{t}$ is the linear part a triplet loss
 
 For dense data, evaluating the sum over triplets costs $O(|T|)$ operations, where $|T|$ is the number of triplets. However, when the data is sparse with a sparsity coefficient $\gamma$, $ 0< \gamma <1 $, evaluating the sum in \eqref{gradMatElem} costs an average of $O(\gamma^2 |T|)$ operations, because we can accumulate only the elements that are both non-zeros in $(\vec{q}_{t})_i$ and in $(\Delta\vec{p}_{t}\T)_j  $ and likewise for $(\vec{q}_{t})_j$ and $(\Delta\vec{p}_{t}\T)_i$.   In order to efficiently evaluate the indicator functions $\{ \textbf{1}(\lambda_{W}^t) \}_{t \in T}$ on \eqref{gradMatElem}. We hold an array of the linear terms $\{\lambda_{W}^t\}_{t \in T}$. Updating a single element $\delta_{i,j}$ of the gradient matrix will force an update of of a sparse number of elements in this array. It costs $O(\gamma^2 |T|)$ operations, because the elements that change are those that are both non-zeros in $(\vec{q}_{t})_i$ and in $(\Delta\vec{p}_{t}\T)_j$ and likewise for $(\vec{q}_{t})_j$ and $(\Delta\vec{p}_{t}\T)_i$.
@@ -447,10 +452,11 @@ Let us define a matrix $\Pp \in \R^{d \times d}$ such that $\Pp_{ij} = p_i + p_j
 
 \begin{lemma}[Expected Separable Overapproximation]\label{lem:ESO}
 For any symmetric $\Hh \in \R^{d \times d}$ such that $\W + \Hh$ is PSD, let $\Hh^i \in \R^{d \times d}$, $i=1 \ldots d$ be identical to $\Hh$ on the $i$-th row and column, and $0$ elsewhere. Then:
-\begin{align*}
-&\mathbb{E}_{i \sim Mult(p_1, \ldots, p_d)} \left[ \tilde{L}(\W + \Hh^i) \right] \leq \\
-&\tL + \sum_{k,l=1}^d  \grdkl \Hh_{kl} \Pp_{kl} + \frac{1}{2} \sum_{k,l=1}^d   M_k (\Hh_{kl})^2 \Pp_{kl}
-\end{align*}
+\begin{equation}
+\mathbb{E}_{i \sim Mult(p_1, \ldots, p_d)} \left[ \tilde{L}(\W + \Hh^i) \right] \leq 
+\tL + \sum_{k,l=1}^d  \grdkl \Hh_{kl} \Pp_{kl} + \frac{1}{2} \sum_{k,l=1}^d   M_k (\Hh_{kl})^2 \Pp_{kl}
+\end{equation}
+
 \end{lemma}
 
 
@@ -494,15 +500,13 @@ We used 135,000 triplets (and 300,000 LEGO constraints) for training, roughly as
 \subsection{Experimental setup}
 In both datasets, two samples are considered similar if they share the same class label. Each data set is tested on a two layer 5 fold cross validation experiment with 80\%/20\% random splits. We use the same (frozen) random splits across all approaches. We trained all learners with the exact same set of triplets, except for LEGO that uses pairs constraints. We verified that we choose the triplets/constraints number in a regime such that test performance converges (figures not shown due to space constraints). We generated triplets randomly while keeping a fixed number of triplets per query sample.
 
-\begin{figure}[!ht]
-\vskip 0.2in
-\begin{center}
-\centerline{\includegraphics[width=\columnwidth]{COMET_convergence}}
-\caption{ \textit{Precision-at-top-k} of COMET, evaluated on the test set, as a function of the number of coordinate steps, normalized to the data dimension. Error bars denote the standard error of the mean across 5 random train/test partitions (80\%/20\%) }
-\label{cometConvergeFig}
-\end{center}
-\vskip -0.2in
-\end{figure} 
+\begin{figure}[!h]
+           \begin{floatrow}
+             \ffigbox{\includegraphics[scale = 0.24]{COMET_convergence_NIPS}}{\caption{\textit{Precision-at-top-k} of COMET, evaluated on the test set, as a function of the number of coordinate steps, normalized to the data dimension. Error bars denote the standard error of the mean across 5 random train/test partitions (80\%/20\%)}\label{cometConvergeFig}}
+             \ffigbox{\includegraphics[scale = 0.24]{Precision_at_K_all_datasets_NIPS}}{\caption{(best seen in color) Comparison of the performance of COMET, LEGO, BoostMetric, HDSL and the Euclidean metrics across the datasets. Each curve shows the \textit{precision-at-top-k}, evaluated on the test set, as a function of $k$ neighbours. The results are averaged across 5 train/test random partitions (80\%/20\%), error bars are standard error of the means.}\label{precFig}}
+           \end{floatrow}
+\end{figure}
+     
 
 % -----------------------------
 \subsection{Evaluation measures}
@@ -521,16 +525,6 @@ Figure \ref{cometConvergeFig} traces the \textit{precision-at-top-k} over the te
 Figure \ref{precFig} compares the precision obtained with COMET, with four competing approaches, as described above. COMET achieved consistently superior or equal results throughout the full range of k (number of neighbours) tested. 
 
 Surprisingly, when studying the optimal values of hyper parameters, we found that the Frobenius regularizer obtained very small weights. Setting its coefficient to zero did not harm the performance.We also compared COMET with OASIS, a method that learns a non-PSD similarity matrix, which has been shown to yield better precision on the Caltech data \cite{OASIS}. Interestingly, COMET achieves near identical precision to OASIS.
-
-\begin{figure}[!h]
-\vskip 0.2in
-\begin{center}
-\centerline{\includegraphics[width=\columnwidth]{Precision_at_K_all_datasets}}
-\caption{ (best seen in color) Comparison of the performance of COMET, LEGO, BoostMetric, HDSL and the Euclidean metrics across the datasets. Each curve shows the \textit{precision-at-top-k}, evaluated on the test set, as a function of $k$ neighbours. The results are averaged across 5 train/test random partitions (80\%/20\%), error bars are standard error of the means.}
-\label{precFig}
-\end{center}
-\vskip -0.2in
-\end{figure} 
 
 
 
