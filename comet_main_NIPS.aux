@@ -17,9 +17,9 @@
 \providecommand*\HyPL@Entry[1]{}
 \bibstyle{unsrtnat}
 \citation{kulis2012survey}
-\citation{bellet2013survey,kulis2012survey}
 \HyPL@Entry{0<</S/D>>}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}}
+\citation{bellet2013survey,kulis2012survey}
 \citation{qianHD,qian}
 \citation{shalev2004online}
 \citation{davis2007information}
@@ -32,9 +32,9 @@
 \citation{weinberger2006dml,OASIS,qian}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Related work}{2}{section.2}}
 \@writefile{toc}{\contentsline {section}{\numberline {3}The learning setup}{2}{section.3}}
-\newlabel{single-triplet-lossed}{{2}{2}{The learning setup}{equation.3.2}{}}
 \citation{OASIS,qianHD,qian}
 \citation{davis2007information,lego}
+\newlabel{single-triplet-lossed}{{2}{3}{The learning setup}{equation.3.2}{}}
 \newlabel{hingelt}{{4}{3}{The learning setup}{equation.3.3}{}}
 \newlabel{eq-logdet-loss}{{4}{3}{The learning setup}{equation.3.4}{}}
 \newlabel{gradMtx}{{5}{3}{The learning setup}{equation.3.5}{}}
@@ -45,27 +45,28 @@
 \newlabel{subsec:step}{{4.1}{4}{Selecting the step size $\eta $}{subsection.4.1}{}}
 \newlabel{schurNotationPreUpdate}{{7}{4}{Selecting the step size $\eta $}{equation.4.7}{}}
 \newlabel{schurCond}{{8}{4}{Selecting the step size $\eta $}{equation.4.8}{}}
-\newlabel{PDUpdateCondNonSimpl}{{9}{4}{Selecting the step size $\eta $}{equation.4.9}{}}
-\newlabel{PDUpdateCondQuadForm}{{10}{4}{Selecting the step size $\eta $}{equation.4.10}{}}
+\newlabel{PDUpdateCondQuadForm}{{9}{4}{Selecting the step size $\eta $}{equation.4.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Analysis of computational complexity}{4}{subsection.4.2}}
 \citation{OASIS,qian}
+\citation{qian}
+\citation{hdsl}
 \citation{nesterov2012efficiency,richtarik2014iteration}
 \citation{richtarik2013optimal}
 \citation{richtarik2013optimal}
 \citation{richtarik2013optimal}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces COMET}}{5}{algorithm.1}}
-\newlabel{alg:comet}{{1}{5}{Selecting the step size $\eta $}{algorithm.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Analysis of computational complexity}{5}{subsection.4.2}}
-\newlabel{gradMatElem}{{11}{5}{Analysis of computational complexity}{equation.4.11}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces COMET\relax }}{5}{algorithm.caption.1}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{alg:comet}{{1}{5}{COMET\relax }{algorithm.caption.1}{}}
+\newlabel{gradMatElem}{{10}{5}{Analysis of computational complexity}{equation.4.10}{}}
+\newlabel{cometComplexity}{{11}{5}{Analysis of computational complexity}{equation.4.11}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5}Convergence rate}{5}{section.5}}
 \citation{richtarik2013optimal}
 \citation{richtarik2013optimal}
 \citation{richtarik2013optimal}
-\citation{richtarik2013optimal}
-\newlabel{lem:smooth}{{1}{6}{Smooth objective}{lemma.1}{}}
-\newlabel{eq:ineq}{{12}{6}{Smooth objective}{equation.5.12}{}}
-\newlabel{lem:ESO}{{2}{6}{Expected Separable Overapproximation}{lemma.2}{}}
 \citation{hdsl}
 \citation{lego}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Experiments}{6}{section.6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Competing approaches}{6}{subsection.6.1}}
 \citation{boost}
 \citation{CaiRCV14}
 \citation{hdsl}
@@ -73,35 +74,23 @@
 \citation{hdsl}
 \citation{hdsl}
 \citation{OASIS}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Experiments}{7}{section.6}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Competing approaches}{7}{subsection.6.1}}
+\citation{OASIS}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Datasets}{7}{subsection.6.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Experimental setup and Evaluation measures}{7}{subsection.6.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Results}{7}{subsection.6.4}}
 \citation{OASIS}
 \citation{OASIS}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Experimental setup}{8}{subsection.6.3}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Evaluation measures}{8}{subsection.6.4}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Results}{8}{subsection.6.5}}
+\citation{OASIS}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textit  {Precision-at-top-k} of COMET, evaluated on the test set, as a function of the number of coordinate steps, normalized to the data dimension. Error bars denote the standard error of the mean across 5 random train/test partitions (80\%/20\%)\relax }}{8}{figure.caption.2}}
+\newlabel{cometConvergeFig}{{1}{8}{\textit {Precision-at-top-k} of COMET, evaluated on the test set, as a function of the number of coordinate steps, normalized to the data dimension. Error bars denote the standard error of the mean across 5 random train/test partitions (80\%/20\%)\relax }{figure.caption.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces (best seen in color) Comparison of the performance of COMET, LEGO, BoostMetric, HDSL and the Euclidean metrics across the datasets. Each curve shows the \textit  {precision-at-top-k}, evaluated on the test set, as a function of $k$ neighbours. The results are averaged across 5 train/test random partitions (80\%/20\%), error bars are standard error of the means.\relax }}{8}{figure.caption.2}}
+\newlabel{precFig}{{2}{8}{(best seen in color) Comparison of the performance of COMET, LEGO, BoostMetric, HDSL and the Euclidean metrics across the datasets. Each curve shows the \textit {precision-at-top-k}, evaluated on the test set, as a function of $k$ neighbours. The results are averaged across 5 train/test random partitions (80\%/20\%), error bars are standard error of the means.\relax }{figure.caption.2}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {7}Summary and future directions}{8}{section.7}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces  \textit  {Precision-at-top-k} of COMET, evaluated on the test set, as a function of the number of coordinate steps, normalized to the data dimension. Error bars denote the standard error of the mean across 5 random train/test partitions (80\%/20\%) }}{9}{figure.1}}
-\newlabel{cometConvergeFig}{{1}{9}{\textit {Precision-at-top-k} of COMET, evaluated on the test set, as a function of the number of coordinate steps, normalized to the data dimension. Error bars denote the standard error of the mean across 5 random train/test partitions (80\%/20\%)}{figure.1}{}}
-\newlabel{appendix-grad}{{7}{9}{Appendix A: Details of gradient derivation for a triplet}{section*.1}{}}
-\newlabel{dlossranking}{{13}{9}{Appendix A: Details of gradient derivation for a triplet}{equation.Alph0.13}{}}
-\citation{woodbury1950inverting}
-\citation{boyd2004convex}
-\newlabel{appendix-inverse}{{7}{10}{Appendix B: Updating the inverse matrices}{section*.2}{}}
-\newlabel{gradMtxWDB}{{14}{10}{Appendix B: Updating the inverse matrices}{equation.Alph0.14}{}}
-\newlabel{InvWwdb}{{15}{10}{Appendix B: Updating the inverse matrices}{equation.Alph0.15}{}}
-\newlabel{BlockInvW}{{16}{10}{Appendix B: Updating the inverse matrices}{equation.Alph0.16}{}}
-\newlabel{InvA}{{17}{10}{Appendix B: Updating the inverse matrices}{equation.Alph0.17}{}}
-\newlabel{appendix-proofs}{{7}{10}{Appendix C: Proofs}{section*.3}{}}
-\citation{richtarik2013optimal}
-\citation{richtarik2013optimal}
-\citation{richtarik2013optimal}
-\citation{richtarik2013optimal}
-\citation{richtarik2013optimal}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Run time statistics, minutes.\relax }}{9}{table.caption.3}}
+\newlabel{runtimes}{{1}{9}{Run time statistics, minutes.\relax }{table.caption.3}{}}
 \bibdata{comet}
 \bibcite{kulis2012survey}{{1}{2012}{{Kulis}}{{}}}
-\bibcite{bellet2013survey}{{2}{2013}{{Bellet et~al.}}{{Bellet, Habrard, and Sebban}}}
+\bibcite{bellet2013survey}{{2}{2014}{{Bellet et~al.}}{{Bellet, Habrard, and Sebban}}}
 \bibcite{qianHD}{{3}{2014{}}{{Qian et~al.}}{{Qian, Jin, Zhu, and Lin}}}
 \bibcite{qian}{{4}{2014{}}{{Qian et~al.}}{{Qian, Jin, Yi, Zhang, and Zhu}}}
 \bibcite{shalev2004online}{{5}{2004}{{Shalev-Shwartz et~al.}}{{Shalev-Shwartz, Singer, and Ng}}}
@@ -113,12 +102,9 @@
 \bibcite{liu2012robust}{{11}{2012}{{Liu and Vemuri}}{{}}}
 \bibcite{nesterov2012efficiency}{{12}{2012}{{Nesterov}}{{}}}
 \bibcite{richtarik2014iteration}{{13}{2014}{{Richt{\'a}rik and Tak{\'a}{\v {c}}}}{{}}}
-\bibcite{OASIS}{{14}{2010}{{Chechik et~al.}}{{Chechik, Sharma, Shalit, and Bengio}}}
-\bibcite{weinberger2006dml}{{15}{2006}{{Weinberger et~al.}}{{Weinberger, Blitzer, and Saul}}}
+\bibcite{OASIS}{{14}{2010}{{Gal~Chechik and Bengio}}{{}}}
+\bibcite{weinberger2006dml}{{15}{2006}{{Kilian Q.~Weinberger and Saul}}{{}}}
 \bibcite{boyd2004convex}{{16}{2004}{{Boyd and Vandenberghe}}{{}}}
 \bibcite{richtarik2013optimal}{{17}{2013}{{Richt{\'a}rik and Tak{\'a}{\v {c}}}}{{}}}
 \bibcite{CaiRCV14}{{18}{2012}{{Cai and He}}{{}}}
 \bibcite{infogain}{{19}{1997}{{Yang and Pedersen}}{{}}}
-\bibcite{woodbury1950inverting}{{20}{1950}{{Woodbury}}{{}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces  (best seen in color) Comparison of the performance of COMET, LEGO, BoostMetric, HDSL and the Euclidean metrics across the datasets. Each curve shows the \textit  {precision-at-top-k}, evaluated on the test set, as a function of $k$ neighbours. The results are averaged across 5 train/test random partitions (80\%/20\%), error bars are standard error of the means.}}{13}{figure.2}}
-\newlabel{precFig}{{2}{13}{(best seen in color) Comparison of the performance of COMET, LEGO, BoostMetric, HDSL and the Euclidean metrics across the datasets. Each curve shows the \textit {precision-at-top-k}, evaluated on the test set, as a function of $k$ neighbours. The results are averaged across 5 train/test random partitions (80\%/20\%), error bars are standard error of the means}{figure.2}{}}
