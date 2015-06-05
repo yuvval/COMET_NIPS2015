@@ -136,7 +136,7 @@ Learning distance metrics from data amounts to optimization over the cone of pos
 
 Here we describe COMET, a block-coordinate descent procedure, which efficiently keeps the search within the PD cone, avoiding both costly projections and unnecessary computation of full gradients. This is achieved by repeatedly optimizing a single column-and-row of the metric matrix, while using the Schur complement condition to guarantee that updates stay within the positive definite cone. 
 
-As a block-coordinate descent procedure, COMET has fast convergence bounds showing linear convergence with high probability. When tested on benchmark datasets in a task of retrieving similar images and similar text documents, COMET significantly outperforms competing projection-free methods. Interestingly, COMET is naturally set up for learning metrics in face of a growing and changing feature set.
+As a block-coordinate descent procedure, COMET has fast convergence bounds showing linear convergence with high probability. When tested on benchmark datasets in a task of retrieving similar images and similar text documents, COMET significantly outperforms competing projection-free methods. Interestingly, COMET is naturally set up for learning metrics in face of a growing and changing feature set, by optimizing the metric matrix one column-row at a time.
 \end{abstract} 
 
 \section{Introduction}
@@ -145,7 +145,7 @@ Metric learning, learning a measure of pairwise distance among data samples, is 
 Learning a metric is often cast as solving a convex optimization problem over the cone of positive definite (PD) matrices\ignore{ by optimizing a similarity measure $sim_W (x,y) = x^\top W y$ s.t. $W \in \R^{d \times d}$ is a PD matrix} \cite{kulis2012survey,bellet2013survey}. Unfortunately, obeying the PD constraint has a high computational cost. Projections to the PD cone require an eigendecomposition which is cubic in the number of features, and the alternative of restricting optimization within the PD cone is also hard to perform efficiently. As a result, finding efficient optimization algorithms for metric learning is an ongoing thorny challenge. 
 
 This paper proposes a new efficient algorithm for learning PD metrics called  {\em{COordinate-descent METric learning}} (COMET), introducing a cost-effective method for performing block-coordinate descent over positive definite matrices.
-COMET can efficiently optimize all the standard metric learning optimization loss functions, while maintaining a PD matrix model at all times during learning, with no need for eigendecompositions. COMET guarantees a linear convergence rate to the global optimum, and can leverage data sparsity for further computational gains. 
+COMET can efficiently optimize all the standard metric learning optimization loss functions, while maintaining a PD matrix model continuously during learning, with no need for eigendecompositions. COMET guarantees a linear convergence rate to the global optimum, and leverages data sparsity for further computational gains. 
 
 Our method works by updating the learned matrix one column and row at a time, thus updating the terms relating to one feature at each iteration. We use a $\log \det$ term as a barrier function for the PD cone, and employ the Schur complement to efficiently calculate the exact step size which will maintain the model within the PD cone. Evaluations of COMET on benchmark datasets show that it performs better than other scalable metric learning methods which avoid costly projections. 
 
@@ -296,13 +296,13 @@ of \eqref{PDUpdateCondQuadForm} is $O(d^2)$, while keeping $O(d^2)$ matrix eleme
 Our approach is summarized in Algorithm \ref{alg:comet}.
 
 
-\subsection{Summary of computational complexity}
+\subsection{Computational complexity}
 
-In Table \ref{comp-complx} we summarize the asymptotic computational complexity of COMET and several competing methods. COMET's computational complexity is better than SGD based methods \cite{OASIS, qian} which require repeated projections. COMET also has lower complexity than HDSL \cite{hdsl}, and finally, in the case of many samples with at least moderate sparsity, COMET's computational complexity is better than LEGO \cite{lego}. For the derivation of the computational complexity results please see Appendix C in the supplemental section. 
+Table \ref{comp-complx} summarizes the asymptotic computational complexity of COMET and several competing methods. COMET's complexity is better than SGD-based methods which require repeated projections \cite{OASIS, qian}. COMET also has lower complexity than HDSL \cite{hdsl}.  Finally, in the regime of many samples with at least moderate sparsity, COMET's computational complexity is better than LEGO \cite{lego}. The derivation of the computational complexity results is given in Appendix C in the supplemental section. 
 
 
 \begin{table*}[t]
-\caption{Asymptotic computational complexity per pass over all triplets and coordinates, comparing COMET, SGD based methods \cite{OASIS, qian}, HDSL \cite{hdsl} and LEGO \cite{lego}. $T$ is the number of triplets, $d$ is the dimension, $0<\gamma \leq 1$ is the data sparsity, and $P$ is the size of triplets batch between PSD projections for the SGD based methods; \citeauthor{qian} used $P=10$. We note that HDSL sometimes converges before going over all coordinates, but then typically achieves significantly inferior test performance. HDSL might perform better for problems where the true optimum is a sparse matrix. COMET is better than SGD with multiple projections and better than HDSL. COMET also achieves better complexity than LEGO if $T(1-\gamma^2) > d^2$, that is whenever the data is even moderately sparse and the number of triplets is larger than the number of matrix parameters.}
+\caption{Asymptotic computational complexity per pass over all triplets and coordinates, comparing COMET, SGD based methods \cite{OASIS, qian}, HDSL \cite{hdsl} and LEGO \cite{lego}. $T$ is the number of constraints (triplets), $d$ is the dimension, $0<\gamma \leq 1$ is the data sparsity, and $P$ is the size of triplets batch between PSD projections for the SGD based methods; \citeauthor{qian} used $P=10$. We note that HDSL sometimes converges before going over all coordinates, but then typically achieves significantly inferior test performance. HDSL might perform better for problems where the true optimum is a sparse matrix. COMET is better than SGD with multiple projections and better than HDSL. COMET also achieves better complexity than LEGO if $T(1-\gamma^2) > d$, that is whenever the data is even moderately sparse and the number of triplets is larger than the number of features.}
 \label{comp-complx}
 \vskip 0.15in
 \begin{center}
@@ -345,12 +345,19 @@ If $t > \frac{\Lambda (M^1 + \alpha d (1/\kappa)^2 + \beta)}{\beta^*} log \left(
 \end{theorem}
 See Appendix D (in supplementary materials) for the proof of Theorem 1.
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=12cm]{COMET_convergence_NIPS}
+\caption{\textit{Precision-at-k} of COMET, evaluated on the test set, as a function of the number of coordinate steps, normalized to the data dimension. Error bars denote the standard error of the mean across 5 random train/test partitions (80\%/20\%).}\label{cometConvergeFig}
+\end{figure}
 
+\ignore{
 \begin{figure}[h]
 \floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,top},capbesidewidth=4cm}}]{figure}[\FBwidth]
 {\caption{\textit{Precision-at-k} of COMET, evaluated on the test set, as a function of the number of coordinate steps, normalized to the data dimension. Error bars denote the standard error of the mean across 5 random train/test partitions (80\%/20\%).}\label{cometConvergeFig}}
 {\includegraphics[width=9cm]{COMET_convergence_NIPS}}
 \end{figure}
+} %end ignore
 
 \section{Experiments}
 We evaluate COMET on three datasets and compare its performance with four metric-learning approaches. All the approaches we compare with learn a Mahalanobis metric matrix and avoid repeated projections to the PD cone. 
@@ -366,10 +373,11 @@ We evaluate COMET on three datasets and compare its performance with four metric
 \textbf{LEGO} \cite{lego}. This approach uses a $\log \det$ barrier term to enforce the PD constraint. The main variant of LEGO aims to fit pairwise distances. We used a variant of LEGO that, like COMET, learns from relative similarities. Loss is incurred for same-class samples farther than a certain distance, and different-class samples closer than a certain distance. We re-wrote the provided source code in order to make it more efficient and decrease its runtime.
 
 \textbf{BoostMetric} \cite{boost}. Based on the observation that any positive semidefinite matrix can be decomposed into linear positive combination of rank-1 matrices, BoostMetric uses rank-1 PSD matrices as weak learners within a boosting based learning process.
+
 \begin{figure}[h]
-\floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,top},capbesidewidth=4cm}}]{figure}[\FBwidth]
-{\caption{(best seen in color) Comparison of the performance of COMET, LEGO, BoostMetric, HDSL and the Euclidean metrics across the datasets. Each curve shows the \textit{precision-at-k}, evaluated on the test set, as a function of $k$ neighbours. The results are averaged across 5 train/test random partitions (80\%/20\%), error bars are standard error of the means.}\label{precFig}}
-{\includegraphics[width=9cm]{Precision_at_K_all_datasets_NIPS}}
+\centering
+\includegraphics[width=12cm]{Precision_at_K_all_datasets_NIPS}
+\caption{(best seen in color) Comparison of the performance of COMET, LEGO, BoostMetric, HDSL and the Euclidean metrics across the datasets. Each curve shows the \textit{precision-at-k}, evaluated on the test set, as a function of $k$ neighbours. The results are averaged across 5 train/test random partitions (80\%/20\%), error bars are standard error of the means.}\label{precFig}
 \end{figure}
 
 \subsection{Datasets}
@@ -394,7 +402,9 @@ We evaluated \textit{precision-at-k} on the test set as a function of $k$ neighb
 Figure \ref{cometConvergeFig} shows the \textit{precision-at-k} over the test sets as it progresses during learning. We observe that convergence is usually achieved after $6 \cdot d$ to $8 \cdot d$ coordinate steps.
 Figure \ref{precFig} compares the precision obtained with COMET with four competing approaches, as described above. COMET achieved consistently superior or equal results throughout the full range of number of neighbours tested. 
 
-Surprisingly, when studying the optimal values of hyper parameters, we found that the Frobenius regularizer obtained very small weights. Setting its coefficient to zero did not harm the performance. We also compared COMET with OASIS on the Caltech dataset. OASIS is a method that learns a non-PSD similarity matrix. It has shown to yield better precision on the Caltech dataset \cite{OASIS}. COMET achieves near identical precision to OASIS, probably because both methods essentially optimize a very similar objective.
+Surprisingly, when studying the optimal values of hyper parameters, we found that the Frobenius regularizer obtained very small weights. Setting its coefficient to zero did not harm the performance. 
+
+We also compared COMET with OASIS on the Caltech dataset. OASIS is a method that learns a non-PSD similarity matrix. It was shown to yield better precision on the Caltech dataset \cite{OASIS}. COMET achieves near identical precision to OASIS, probably because both methods essentially optimize a very similar objective.
 
 \tabref{runtimes} compares the run times of the different approaches\footnote{We had partial results with BoostMetric, hence we omitted its results from the run time table.}. LEGO was fastest; HDSL (with core implemented in C) is sometimes faster and sometimes slower than COMET (implemented in MATLAB). Importantly, COMET converged to a better optimum.
 
