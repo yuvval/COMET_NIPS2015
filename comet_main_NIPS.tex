@@ -168,7 +168,8 @@ entities, like images or text documents based on their
 relative pairwise similarities.
 
 Formally, following \citet{OASIS}, let $\cal{P}$ be a set of entities $\{\p_1,...,\p_N\}$ each represented as a vector in $\Rd$. We measure the similarity of two samples $\q, \p \in \cal{P}$ using a bilinear
-form parametrized by a model $\W \in \mathbb{R}^{d \times d}$, $S_{\W}(\q, \p) = \q\T \W \p$
+form parametrized by a model $\W \in \mathbb{R}^{d \times d}$, $S_{\W}(\q, \p) = \q\T \W \p$.
+
 When the matrix $\W$ is PSD, it can be factored as $\W = A^TA$ and used to define a distance measure over pairs of data points. This is achieved by using the root matrix $A$ to transform the data. The similarity $x^\top\W y$ between two data points $x$ and $y$ through the matrix $\W$, is equivalent to an Euclidean inner product  $(Ax)^\top(Ay)$ in the transformed space $x \mapsto Ax$. We assume that a weak form of supervision is given in the form of a ranking over triplets. Such ranking supervision is often easy to obtain and has been shown to achieve good performance \cite{weinberger2006dml,OASIS,qian}. We assume we have access to triplets of entities from $\cal{P}$, where each triplet $t$ consists of
 a ``query'' instance $\qt \in \cal{P}$, and two instance $\pt^{+}, \pt^{-} \in \cal{P}$ such that $\qt$ is more similar to $\pt^{+}$
 than to $\pt^{-}$.
@@ -297,6 +298,29 @@ Our approach is summarized in Algorithm \ref{alg:comet}.
 
 In this subsection we show that the asymptotic computational complexity of COMET is better than SGD based methods \cite{OASIS, qian} which require repeated projections. We also show that COMET has lower complexity than HDSL \cite{hdsl}, and finally we show that in the case of many samples with at least moderate sparsity, COMET's computational complexity is better than LEGO \cite{lego}.
 
+
+\begin{table*}[t]
+\caption{Asymptotic computational complexity per data pass of COMET, SGD based methods \citep{OASIS, qian}, HDSL \c . $T$ is the number of triplets, $d$ is the dimension, $0<\gamma \leq 1$ is the data sparsity, and $P$ is the frequenct of PSD projections for the SGD based methods}
+\label{comp-complx}
+\vskip 0.15in
+\begin{center}
+\begin{small}
+\begin{sc}
+\begin{tabular}{lccr}
+\hline
+ COMET  & SGD+project.  & HDSL    & LEGO         \\ 
+\hline
+$O(\gamma^2 d^2 T +  d^3)$&  $O(\gamma^2 d^2 T + \frac{T}{P} \cdot d^3)$
+&   $O(d^3 + T\cdot  d^4)$ &   $O(d^2 \cdot T)$  \\
+\hline
+\end{tabular}
+\end{sc}
+\end{small}
+\end{center}
+\vskip -0.1in
+\end{table*}
+
+
 We first evaluate the computational complexity of a single coordinate step \eqref{gradMtx}, including the computation of the gradient and updating of $\W$, $\W^{-1}$ and $\invA$. Consider first the computation of the gradient. For the hinge-loss case $l^{h}_W$, each element $\delta_{i,j}$ of the gradient matrix \eqref{gradMtx} equals
 \begin{equation}
     \delta_{(i,j)} = \sum\limits_{t\in \cal{T}}{ [\tfrac{1}{2}[(\vec{q}_{t})_i(\Delta\vec{p}_{t}\T)_j + (\Delta\vec{p}_{t}\T)_i(\vec{q}_{t})_j\T] } \cdot \textbf{1}(\lambda_{W}^t) - \alpha \cdot \W^{-1}_{i,j} + \beta \cdot \W_{i,j},
@@ -304,7 +328,7 @@ We first evaluate the computational complexity of a single coordinate step \eqre
 \end{equation}
 where $\lambda_{W}^t \eqdef 1+\qt\T \W \Delta\p_{t}$ is the linear part a triplet loss
 
-For dense data, evaluating the sum over triplets costs $O(T)$ operations, where $T$ is the number of triplets. However, for sparse data with a sparsity coefficient $ 0< \gamma <1 $, evaluating the sum in \eqref{gradMatElem} costs an average of $O(\gamma^2 T)$ operations, because we can accumulate only the elements that are both non-zeros in $(\vec{q}_{t})_i$ and in $(\Delta\vec{p}_{t}\T)_j  $ and likewise for $(\vec{q}_{t})_j$ and $(\Delta\vec{p}_{t}\T)_i$.   To efficiently evaluate the indicator functions $\{ \textbf{1}(\lambda_{W}^t) \}_{t \in T}$ on \eqref{gradMatElem}, we keep an array of the linear terms $\{\lambda_{W}^t\}_{t \in T}$. Computing all the gradient elements $\delta_{(k,1:d)}$ in a single row $k$ costs $O(d\cdot \gamma^2 T)$.
+For dense data, evaluating the sum over $T$ triplets costs $O(T)$ operations. However, for $gamma$-sparse data with a sparsity coefficient $ 0< \gamma <1 $, evaluating the sum in \eqref{gradMatElem} costs an average of $O(\gamma^2 T)$ operations, because we can accumulate only the elements that are both non-zeros in $(\vec{q}_{t})_i$ and in $(\Delta\vec{p}_{t}\T)_j  $ and likewise for $(\vec{q}_{t})_j$ and $(\Delta\vec{p}_{t}\T)_i$.   To efficiently evaluate the indicator functions $\{ \textbf{1}(\lambda_{W}^t) \}_{t \in T}$ on \eqref{gradMatElem}, we keep an array of the linear terms $\{\lambda_{W}^t\}_{t \in T}$. Computing all the gradient elements $\delta_{(k,1:d)}$ in a single row $k$ costs $O(d\cdot \gamma^2 T)$.
 Maintaining and updating $\W^{-1}$ and $\invA$, and computing the optimal step size following equations on Appendix B (in supplementary), each costs $O(d^2)$ operations. 
 To conclude, the total computational complexity per block-coordinate step is $O(\gamma^2 d T + d^2)$. When taking $Nd$ coordinate steps, the overall complexity of COMET is 
 \begin{equation}
@@ -406,7 +430,7 @@ Dataset     & COMET           & LEGO            & HDSL             \\
 \hline
 Reuters CV1, (5K feat.)&  1656 $\pm$    13 &   423 $\pm$    29 &   522 $\pm$    24  \\ 
 Caltech256 50 Cat. (1K feat.)  &    72 $\pm$     2 &    15 $\pm$     3 &   495 $\pm$    73  \\ 
-Caltech256 249 Cat. (1K feat.) &   220 $\pm$    10 &    20 $\pm$     3 &        *        \\
+Caltech256 249 Cat. (1K feat.) &   220 $\pm$    10 &    20 $\pm$     3 &  495 $\pm$    39   \\
 Reuters CV1 (1K feat.) &   157 $\pm$     3 &    11 $\pm$     3 &   115 $\pm$    18  \\ 
 protein, (357 feat.)  &    80 $\pm$    10 &     1 $\pm$     0 &   163 $\pm$    11 \\ 
 \hline
