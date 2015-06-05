@@ -177,13 +177,15 @@ O(N \cdot (\gamma d)^2 T + N \cdot d^3)
 \end{equation}
 We found empirically that COMET converges within $N= 5 - 10$. As a comparison, consider using SGD or mini-batches for the objective of \eqref{hingelt} and projecting onto the PD cone every $P$ triplets ($P \ll T$), as proposed in \cite{OASIS,qian}. The computational complexity per data pass becomes $O((\gamma d)^2 T + \frac{T}{P} d^3)$. This approach is slower than COMET and only reaches the complexity of COMET when projections are very rare. For example, \citet{qian} used mini-batches of $P=10$ triplets. With a total of $T=100k$ triplets, yielding a computational complexity ~1000 times larger than COMET.
 
-Compare further with \citet{hdsl}. COMET’s complexity is better than HDSL. The fast heuristic version of HDSL is $O(Md+Tk)$ per coordinate step, where $M$ is the size of mini-batch, $k$ is the iteration number. This is summed over $k=1,...,O(d^2)$ iterations, since each HDSL step considers a single pair of features, updating 4 matrix entries as opposed to $2d-1$ entries in COMET. Overall, this yields $O(Md^3+Td^4)$ computations for HDSL, compared with \eqref{cometComplexity} of COMET. Since both $M$ and $N$ are typically small, this means HDSL is more costly than COMET by a factor of $\frac{d^2}{N}$. In our experiments, HDSL sometimes uses much less than $O(d^2)$ iterations, but then achieves a significantly inferior test error.
+Compare further with \citet{hdsl}. COMET’s complexity is better than HDSL. The fast heuristic version of HDSL is $O(M\gamma d+Tk)$ per coordinate step, where $M$ is the size of mini-batch, $k$ is the iteration number. This is summed over $k=1,...,O(d^2)$ iterations, since each HDSL step considers a single pair of features, updating 4 matrix entries as opposed to $2d-1$ entries in COMET. Overall, this yields $O(M\gamma d^3+Td^4)$ computations for HDSL, compared with \eqref{cometComplexity} of COMET. Since both $M$ and $N$ are typically small, this means HDSL is more costly than COMET by a factor of $\frac{d^2}{N}$. In our experiments, HDSL sometimes uses much less than $O(d^2)$ iterations, but then achieves a significantly inferior test error. We believe that HDSL would excel in cases where the true optimum is very sparse, and there is no need to go over the entire set of $d \choose 2$ coordinate pairs.
 
 Finally, we compare with the complexity of LEGO \cite{lego}. LEGO requires $O(d^2)$ computation per constraint. Thus for $N$ passes over $T$ triplets LEGO's complexity is $O(N\cdot d^2 \cdot T)$. Assuming an equal number of passes over the triplet, we find that COMET's complexity \eqref{cometComplexity} is asymptotically better than LEGO as long as $N \cdot T \cdot (1-\gamma^2) > d^2$. That is, whenever the data is even moderately sparse, and the number of triplets is larger than the number of matrix parameters.
 
 {\bf COMET Memory footprint}: Keeping the data triplets in memory takes $O(\gamma d T)$ elements and holding $\W$ and $\W^{-1}$ costs $O(d^2)$. The total memory usage is $O(\gamma d T + d^2)$. 
 
 \section*{Appendix D: Proofs and Lemmas}
+
+We first establish two auxiliary lemmas, then proceed to the proof of Theorem 1.
 \label{appendix-proofs}
 \begin{lemma}[Smooth objective]
 \label{lem:smooth}
@@ -245,7 +247,7 @@ Inequality (a) is due to Lemma \ref{lem:smooth}. Equality (b) is by changing the
 \end{proof}
 
 \begin{theorem}
-Let $\W^t$ be the $t$-th iterate of Algorithm \ref{alg:comet} with objective function $\tL$, sampling each column-row $i$ with probability $p_i$ and using step sizes $\eta_i \leq \frac{1}{M_i}$. Let $\tilde{L}^*$ be the optimal value of $\tL$ on the PSD cone. Let $\beta^* \geq \beta$ be the strong convexity parameter of $\tL$, $M^1 = \max_i M^1_i$, $\Lambda = \max_i \frac{1}{p_i}$, $\rho >0, \epsilon>0$.
+Let $\W^t$ be the $t$-th iterate of Algorithm \ref{alg:comet} with objective function $\tL$, sampling each column-row $i$ with probability $p_i$ and using step sizes $\eta_i \leq \frac{1}{M_i}$. Let $\tilde{L}^*$ be the optimal value of $\tL$ on the PD cone. Let $\beta^* \geq \beta$ be the strong convexity parameter of $\tL$, $M^1 = \max_i M^1_i$, $\Lambda = \max_i \frac{1}{p_i}$, $\rho >0, \epsilon>0$, and $W^t$ the $t$ iterate of Algorithm \ref{alg:comet}.
 
 If $t > \frac{\Lambda (M^1 + \alpha d (1/\kappa)^2 + \beta)}{\beta^*} log \left( \frac{\tilde{L}(W^0) - \tilde{L}^*}{\epsilon \rho}\right)$ then: $Prob(\tilde{L}(\W^k) - \tilde{L}^* \leq \epsilon) \geq 1-\rho$.
 \end{theorem}
