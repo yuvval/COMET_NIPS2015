@@ -294,13 +294,13 @@ Our approach is summarized in Algorithm \ref{alg:comet}.
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Analysis of computational complexity}
+\subsection{Summary of computational complexity}
 
-In this subsection we show that the asymptotic computational complexity of COMET is better than SGD based methods \cite{OASIS, qian} which require repeated projections. We also show that COMET has lower complexity than HDSL \cite{hdsl}, and finally we show that in the case of many samples with at least moderate sparsity, COMET's computational complexity is better than LEGO \cite{lego}.
+In Table \ref{comp-complx} below we summarize the asymptotic computational complexity of COMET and several competing methods. COMET's computational complexity is better than SGD based methods \cite{OASIS, qian} which require repeated projections. COMET also has lower complexity than HDSL \cite{hdsl}, and finally, in the case of many samples with at least moderate sparsity, COMET's computational complexity is better than LEGO \cite{lego}. For the derivation of the computational complexity 
 
 
 \begin{table*}[t]
-\caption{Asymptotic computational complexity per data pass of COMET, SGD based methods \citep{OASIS, qian}, HDSL \c . $T$ is the number of triplets, $d$ is the dimension, $0<\gamma \leq 1$ is the data sparsity, and $P$ is the frequenct of PSD projections for the SGD based methods}
+\caption{Asymptotic computational complexity per pass over all triplets and coordinates, comparing COMET, SGD based methods \cite{OASIS, qian}, HDSL \cite{hdsl} and LEGO \cite{lego}. $T$ is the number of triplets, $d$ is the dimension, $0<\gamma \leq 1$ is the data sparsity, and $P$ is the frequency of PSD projections for the SGD based methods. \citeauthor{qian} used $P=10$. We note that HDSL sometimes converges before going over all coordinates, but then achieves significantly inferior test performance. COMET is better than SGD with multiple projections and better than HDSL. COMET also achieves better complexity than LEGO if $T(1-\gamma^2) > d^2$, that is whenever the data is even moderately sparse, and the number of triplets is larger than the number of matrix parameters.}
 \label{comp-complx}
 \vskip 0.15in
 \begin{center}
@@ -311,7 +311,7 @@ In this subsection we show that the asymptotic computational complexity of COMET
  COMET  & SGD+project.  & HDSL    & LEGO         \\ 
 \hline
 $O(\gamma^2 d^2 T +  d^3)$&  $O(\gamma^2 d^2 T + \frac{T}{P} \cdot d^3)$
-&   $O(d^3 + T\cdot  d^4)$ &   $O(d^2 \cdot T)$  \\
+&   $O( T\cdot  d^4)$ &   $O(d^2 \cdot T)$  \\
 \hline
 \end{tabular}
 \end{sc}
@@ -320,28 +320,6 @@ $O(\gamma^2 d^2 T +  d^3)$&  $O(\gamma^2 d^2 T + \frac{T}{P} \cdot d^3)$
 \vskip -0.1in
 \end{table*}
 
-
-We first evaluate the computational complexity of a single coordinate step \eqref{gradMtx}, including the computation of the gradient and updating of $\W$, $\W^{-1}$ and $\invA$. Consider first the computation of the gradient. For the hinge-loss case $l^{h}_W$, each element $\delta_{i,j}$ of the gradient matrix \eqref{gradMtx} equals
-\begin{equation}
-    \delta_{(i,j)} = \sum\limits_{t\in \cal{T}}{ [\tfrac{1}{2}[(\vec{q}_{t})_i(\Delta\vec{p}_{t}\T)_j + (\Delta\vec{p}_{t}\T)_i(\vec{q}_{t})_j\T] } \cdot \textbf{1}(\lambda_{W}^t) - \alpha \cdot \W^{-1}_{i,j} + \beta \cdot \W_{i,j},
-\label{gradMatElem}
-\end{equation}
-where $\lambda_{W}^t \eqdef 1+\qt\T \W \Delta\p_{t}$ is the linear part a triplet loss
-
-For dense data, evaluating the sum over $T$ triplets costs $O(T)$ operations. However, for $gamma$-sparse data with a sparsity coefficient $ 0< \gamma <1 $, evaluating the sum in \eqref{gradMatElem} costs an average of $O(\gamma^2 T)$ operations, because we can accumulate only the elements that are both non-zeros in $(\vec{q}_{t})_i$ and in $(\Delta\vec{p}_{t}\T)_j  $ and likewise for $(\vec{q}_{t})_j$ and $(\Delta\vec{p}_{t}\T)_i$.   To efficiently evaluate the indicator functions $\{ \textbf{1}(\lambda_{W}^t) \}_{t \in T}$ on \eqref{gradMatElem}, we keep an array of the linear terms $\{\lambda_{W}^t\}_{t \in T}$. Computing all the gradient elements $\delta_{(k,1:d)}$ in a single row $k$ costs $O(d\cdot \gamma^2 T)$.
-Maintaining and updating $\W^{-1}$ and $\invA$, and computing the optimal step size following equations on Appendix B (in supplementary), each costs $O(d^2)$ operations. 
-To conclude, the total computational complexity per block-coordinate step is $O(\gamma^2 d T + d^2)$. When taking $Nd$ coordinate steps, the overall complexity of COMET is 
-\begin{equation}
-O(N \cdot (\gamma d)^2 T + N \cdot d^3)
-\label{cometComplexity}
-\end{equation}
-We found empirically that COMET converges within $N= 5 - 10$. As a comparison, consider using SGD or mini-batches for the objective of \eqref{hingelt} and projecting onto the PD cone every $P$ triplets ($P \ll T$), as proposed in \cite{OASIS,qian}. The computational complexity per data pass becomes $O((\gamma d)^2 T + \frac{T}{P} d^3)$. This approach is slower than COMET and only reaches the complexity of COMET when projections are very rare. For example, \citet{qian} used mini-batches of $P=10$ triplets. With a total of $T=100k$ triplets, yielding a computational complexity ~1000 times larger than COMET.
-
-Compare further with \citet{hdsl}. COMET’s complexity is better than HDSL. The fast heuristic version of HDSL is $O(Md+Tk)$ per coordinate step, where $M$ is the size of mini-batch, $k$ is the iteration number. This is summed over $k=1,...,O(d^2)$ iterations, since each HDSL step considers a single pair of features, updating 4 matrix entries as opposed to $2d-1$ entries in COMET. Overall, this yields $O(Md^3+Td^4)$ computations for HDSL, compared with \eqref{cometComplexity} of COMET. Since both $M$ and $N$ are typically small, this means HDSL is more costly than COMET by a factor of $\frac{d^2}{N}$. In our experiments, HDSL sometimes uses much less than $O(d^2)$ iterations, but then achieves a significantly inferior test error.
-
-Finally, we compare with the complexity of LEGO \cite{lego}. LEGO requires $O(d^2)$ computation per constraint. Thus for $N$ passes over $T$ triplets LEGO's complexity is $O(N\cdot d^2 \cdot T)$. Assuming an equal number of passes over the triplet, we find that COMET's complexity \eqref{cometComplexity} is asymptotically better than LEGO as long as $N \cdot T \cdot (1-\gamma^2) > d^2$. That is, whenever the data is even moderately sparse, and the number of triplets is larger than the number of matrix parameters.
-
-{\bf COMET Memory footprint}: Keeping the data triplets in memory takes $O(\gamma d T)$ elements and holding $\W$ and $\W^{-1}$ costs $O(d^2)$. The total memory usage is $O(\gamma d T + d^2)$. 
 
 \section{Convergence rate}
 Our method is based on minimizing a strongly convex function using block-coordinate descent. There is a well established body of work showing that with non-overlapping blocks, block-coordinate descent iterates converge w.h.p. in a linear rate to the optimum value \cite{nesterov2012efficiency,richtarik2014iteration}.
@@ -363,12 +341,12 @@ Let $\W^t$ be the $t$-th iterate of Algorithm \ref{alg:comet} with objective fun
 
 If $t > \frac{\Lambda (M^1 + \alpha d (1/\kappa)^2 + \beta)}{\beta^*} log \left( \frac{\tilde{L}(W^0) - \tilde{L}^*}{\epsilon \rho}\right)$ then: $Prob(\tilde{L}(\W^k) - \tilde{L}^* \leq \epsilon) \geq 1-\rho$.
 \end{theorem}
-See Appendix C (in supplementary) for the proofs relating to the statements in this section.
+See Appendix D (in supplementary) for the proofs relating to the statements in this section.
 
 
 \begin{figure}[h]
 \floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,top},capbesidewidth=4cm}}]{figure}[\FBwidth]
-{\caption{\textit{Precision-at-top-k} of COMET, evaluated on the test set, as a function of the number of coordinate steps, normalized to the data dimension. Error bars denote the standard error of the mean across 5 random train/test partitions (80\%/20\%)}\label{cometConvergeFig}}
+{\caption{\textit{Precision-at-k} of COMET, evaluated on the test set, as a function of the number of coordinate steps, normalized to the data dimension. Error bars denote the standard error of the mean across 5 random train/test partitions (80\%/20\%)}\label{cometConvergeFig}}
 {\includegraphics[width=9cm]{COMET_convergence_NIPS}}
 \end{figure}
 
@@ -388,7 +366,7 @@ We evaluate COMET on two datasets and compare its performance with four metric-l
 \textbf{BoostMetric} \cite{boost}. Based on the observation that any positive semidefinite matrix can be decomposed into linear positive combination of rank-1 matrices, BoostMetric uses rank-1 PSD matrices as weak learners within a boosting based learning process.
 \begin{figure}[h]
 \floatbox[{\capbeside\thisfloatsetup{capbesideposition={right,top},capbesidewidth=4cm}}]{figure}[\FBwidth]
-{\caption{(best seen in color) Comparison of the performance of COMET, LEGO, BoostMetric, HDSL and the Euclidean metrics across the datasets. Each curve shows the \textit{precision-at-top-k}, evaluated on the test set, as a function of $k$ neighbours. The results are averaged across 5 train/test random partitions (80\%/20\%), error bars are standard error of the means.}\label{precFig}}
+{\caption{(best seen in color) Comparison of the performance of COMET, LEGO, BoostMetric, HDSL and the Euclidean metrics across the datasets. Each curve shows the \textit{precision-at-k}, evaluated on the test set, as a function of $k$ neighbours. The results are averaged across 5 train/test random partitions (80\%/20\%), error bars are standard error of the means.}\label{precFig}}
 {\includegraphics[width=9cm]{Precision_at_K_all_datasets_NIPS}}
 \end{figure}
 
@@ -406,11 +384,12 @@ In both datasets, two samples are considered similar if they share the same clas
 
 We evaluated the performance of all algorithms using standard ranking precision measures based on nearest neighbors. For each query instance in the test set, all other test instances were ranked according to their similarity to the query instance. The number of same-class instances
 among the top k instances (the k nearest neighbors) was computed. When averaged across test
-instances, this yields a measure known as \textit{precision-at-top-k},
-providing a precision curve as a function of the rank $k$. \textit{precision-at-top-k} for k >1 is useful in retrieval of multiple objects that are similar to a query object, e.g. an image search engine.
+instances, this yields a measure known as \textit{precision-at-k},
+providing a precision curve as a function of the rank $k$. \textit{precision-at-k} for k >1 is useful in retrieval of multiple objects that are similar to a query object, e.g. an image search engine.
+
 \subsection{Results}
-We evaluated the \textit{precision-at-top-k} on the test set, as a function of $k$ neighbours and averaged the results across 5 random train/test partitions (80\%/20\%)\footnote{Results for RCV1 1K feat., Caltech 249 categories and Protein are in the supplemental section.}.
-Figure \ref{cometConvergeFig} shows the \textit{precision-at-top-k} over the test sets as it progresses during learning. We observe that convergence is usually achieved after $6\times d$ to $8 \times d$ coordinate steps.
+We evaluated \textit{precision-at-k} on the test set as a function of $k$ neighbours, averaged across 5 random train/test partitions (80\%/20\%)\footnote{Results for RCV1 1K feat., Caltech 249 categories and Protein are in the supplemental section.}.
+Figure \ref{cometConvergeFig} shows the \textit{precision-at-k} over the test sets as it progresses during learning. We observe that convergence is usually achieved after $6 \cdot d$ to $8 \cdot d$ coordinate steps.
 Figure \ref{precFig} compares the precision obtained with COMET with four competing approaches, as described above. COMET achieved consistently superior or equal results throughout the full range of number of neighbours tested. 
 
 Surprisingly, when studying the optimal values of hyper parameters, we found that the Frobenius regularizer obtained very small weights. Setting its coefficient to zero did not harm the performance. We also compared COMET with OASIS, a method that learns a non-PSD similarity matrix, which has been shown to yield better precision on the Caltech data \cite{OASIS}. Interestingly, COMET achieves near identical precision to OASIS. 
@@ -442,7 +421,7 @@ protein, (357 feat.)  &    80 $\pm$    10 &     1 $\pm$     0 &   163 $\pm$    1
 \end{table*}
 
 \section{Summary and future directions}
-We presented an approach for learning a distance metric from data samples, continuously restricting the solutions to the positive cone, but avoiding runtime-costly projections. The approach is based on block-coordinate-descent and iteratively updates a single row-column in the matrix that corresponds to a single feature. Our experiments have demonstrated that its \textit{precision-at-top-k} significantly outperforms all competing PSD methods we compared with, while maintaining lower computational complexity. It even achieves a comparable \textit{precision-at-top-k} as \cite{OASIS}, even though \cite{OASIS} is not limited to PSD matrices and only applies a single projection post training
+We presented an approach for learning a distance metric from data samples, continuously restricting the solutions to the positive cone, but avoiding runtime-costly projections. The approach is based on block-coordinate-descent and iteratively updates a single row-column in the matrix that corresponds to a single feature. Our experiments have demonstrated that its \textit{precision-at-k} significantly outperforms all competing PSD methods we compared with, while maintaining lower computational complexity. It even achieves a comparable \textit{precision-at-k} as \cite{OASIS}, even though \cite{OASIS} is not limited to PSD matrices and only applies a single projection post training
 
 An important challenge for learning is the case where the set of features is not fixed in advance, but changes with time. This is a typical scenario in many real life applications of learning: as more data accumulates, it is possible to estimate more parameters accurately, so more features and signals are gradually added to existing systems. It is therefore desirable to develop algorithms that can learn metrics in face of a growing feature set. COMET can be effortlessly adapted to this setup, by extending the existing learned matrices and sample more heavily rows and columns that correspond to new features. The specifics of this approach are the topic of further research.
 
