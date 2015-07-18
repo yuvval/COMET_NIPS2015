@@ -20,6 +20,17 @@
 \usepackage{caption}
 \usepackage{floatrow}%
 
+%%
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\rhead{ }
+\lhead{ }
+\chead{Under Review - Do Not Distribute}
+\usepackage{draftwatermark}
+\SetWatermarkText{DRAFT}
+\SetWatermarkScale{1}
+%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% packeges from ICML
 % use Times
@@ -97,7 +108,7 @@
 
 \author{
 Yuval Atzmon \\
-The Gonda Brain Research Center
+The Gonda Brain Research Center \\
 Bar Ilan University\\
 52900, Israel\\
 \texttt{yuval.atzmon@biu.ac.il} \\
@@ -109,7 +120,7 @@ The Hebrew University of Jerusalem, \\
 \texttt{uri.shalit@mail.huji.ac.il} \\
 \AND
 Gal Chechik \\
-The Gonda Brain Research Center
+The Gonda Brain Research Center \\
 Bar Ilan University\\
 52900, Israel\\
 \texttt{gal.chechik@biu.ac.il}
@@ -126,7 +137,7 @@ Bar Ilan University\\
 \newcommand{\fix}{\marginpar{FIX}}
 \newcommand{\new}{\marginpar{NEW}}
 
-%\nipsfinalcopy % Uncomment for camera-ready version
+\nipsfinalcopy % Uncomment for camera-ready version
 
 \begin{document}
 \maketitle
@@ -419,11 +430,11 @@ We also compared COMET with OASIS on the Caltech dataset. OASIS is a method that
 \hline
 Dataset     & COMET           & LEGO            & HDSL             \\ 
 \hline
-Reuters CV1, (5K feat.)&  994 $\pm$    46 &   423 $\pm$    29 &   522 $\pm$    24  \\ 
-Caltech256 50 Cat. (1K feat.)  &    45 $\pm$     4 &    15 $\pm$     3 &   495 $\pm$    73  \\ 
-Caltech256 249 Cat. (1K feat.) &   143 $\pm$     8 &    20 $\pm$     3 &  495 $\pm$    39   \\
-Reuters CV1 (1K feat.) &   91 $\pm$     7 &    11 $\pm$     3 &   115 $\pm$    18  \\ 
-protein, (357 feat.)  &    4 $\pm$     0 &     1 $\pm$     0 &   163 $\pm$    11 \\ 
+Reuters CV1, (5K feat.)&  1656 $\pm$    13 &   423 $\pm$    29 &   522 $\pm$    24  \\ 
+Caltech256 50 Cat. (1K feat.)  &    72 $\pm$     2 &    15 $\pm$     3 &   495 $\pm$    73  \\ 
+Caltech256 249 Cat. (1K feat.) &   220 $\pm$    10 &    20 $\pm$     3 &  495 $\pm$    39   \\
+Reuters CV1 (1K feat.) &   157 $\pm$     3 &    11 $\pm$     3 &   115 $\pm$    18  \\ 
+protein, (357 feat.)  &    80 $\pm$    10 &     1 $\pm$     0 &   163 $\pm$    11 \\ 
 \hline
 \end{tabular}
 \end{sc}
@@ -445,6 +456,207 @@ An important challenge for learning is the case where the set of features is not
 %\bibliographystyle{icml2015}
 }
 
+\newpage
+\section*{Supplementary Material: Metric Learning One Feature at a Time}
 
+% ==============================================================
+\appendix
+\section*{Appendix A: Details of gradient derivation for a triplet}
+\label{appendix-grad}
+
+To compute matrix gradient step $\frac{\partial {l_t (\W)}}{\partial \W}$ of an arbitrary triplet $t$, we denote the linear part of the hinge loss of a triplet $t$ by $\lambda_{W}^t \eqdef 
+1-\qt\T \W \pt^{+} + \qt\T\W\pt^{-}.$
+
+$\W$ is PD and therefore symmetric. We enforce its gradient to be symmetric by replacing $\W$ with $\tfrac{1}{2}(\W + \W\T)$.
+The derivative of the ranking loss is then given by
+\begin{equation}
+\frac{\partial {l_{\W}^{t}}}{\partial \W} = \tfrac{1}{2}[\vec{q}_{t}\Delta\vec{p}_{t}\T  + \Delta\vec{p}_{t}\vec{q}_{t}\T]\cdot {l'}(\lambda_{W}^t)
+\label{dlossranking}
+\nonumber 
+\end{equation} where $l'(x) \eqdef \frac{d{l(x)}}{dx}$ is the outer derivative of the loss function, $\Delta\vec{p}_{t} \eqdef (\vec{p}_{t}^{-} - \vec{p}_{t}^{+})$.
+
+\section*{Appendix B: Updating the inverse matrices}
+\label{appendix-inverse}
+
+To compute efficiently the updates of \eqref{PDUpdateCondQuadForm} we update $\W^{-1}$ following a block coordinate step, and derive $\invA$ from $\W^{-1}$ before the next step. Both terms take $O(d^2)$ to compute.
+
+$\newW^{-1}$ can be easily computed using the Woodbury matrix
+identity \cite{woodbury1950inverting}. We rewrite \eqref{updateEq} and \eqref{gradMtx} (of the main paper), using $\newW = \W + \eta G = \W+\mat{\widetilde{G}}$
+ %\label{updateEqWDB}
+and write
+\begin{equation}
+  \mat{\widetilde{G}} = \mat{U}\mat{C}\mat{V} = \left[ \begin{matrix}
+      \vec{u} & \vec{e_k} \end{matrix} \right] \left[ \begin{matrix}
+      \eta & 0 \\ 0 & \eta \end{matrix} \right] \left[ \begin{matrix}
+      \vec{e_k}\T \\ \vec{u}\T \end{matrix} \right],
+  \label{gradMtxWDB}
+  \nonumber 
+\end{equation}
+where $\vec{u}$ is a column vector that equals the column $k$ of the gradient matrix of the objective \eqref{gradMtx} (on the main paper) ,
+$\vec{e_k}$ equals an elementary vector for selecting a column $k$ of
+a matrix. 
+Using the Woodbury matrix identity gives 
+\begin{equation}
+    \begin{array}{lcl}
+    \newW^{-1} = 
+    \W^{-1} - \W^{-1} \mat{U} (\eta^{-1} I_2 + \mat{V}     \W^{-1} \mat{U})^{-1} \mat{V} \W^{-1}
+    \end{array}
+    \nonumber
+    \label{InvWwdb}
+\end{equation}
+
+Last, we evaluate $\invA$ before a coordinate step given $\W$
+and $\W^{-1}$, using the Schur complement and its corresponding
+notation \eqref{schurNotationPreUpdate} (on the main paper):
+\begin{equation}
+\begin{array}{l}
+ \W^{-1} \!\!=\!\! 
+ \left[ \begin{array}{cc} s & -s \B\T \invA \\ -s \B\T \invA\T &  \invA \!+ \!\invA \B s \B\T \invA  \end{array}  \right]
+\end{array}
+\label{BlockInvW}
+\end{equation} 
+where $s= \C-\B\T \invA \B$ is a scalar denoting the Schur Complement. This gives us four terms: (1) $s = \W^{-1}_{1,1}$, (2)
+$  -s \B\T \invA = -\W^{-1}_{1,1} \B\T \invA = \W^{-1}_{1,2:d}$, (3) $\B\T \invA = -\frac{\W^{-1}_{1,2:d}}{\W^{-1}_{1,1} }$ and (4) $\invA\B = (\B\T \invA)\T$. Subtituting them in the lower right block of \eqref{BlockInvW} yields $\invA + \frac{1}{\W^{-1}_{1,1} } \W^{-1}_{2:d,1} (\W^{-1}_{2:d,1})\T = \W^{-1}_{2:d,2:d}$. Rearranging the last term gives
+\begin{equation}
+  \invA = \W^{-1}_{2:d,2:d}- \frac{\W^{-1}_{2:d,1} {\W^{-1}_{1, 2:d}}^{\T}}{\W^{-1}_{1,1}}. 
+  \label{InvA}
+\end{equation}
+Computing \eqref{InvA} has a complexity of $O(d^2)$.
+
+\section*{Appendix C: Analysis of computational complexity}
+
+We first evaluate the computational complexity of a single coordinate step \eqref{gradMtx}, including the computation of the gradient and updating of $\W$, $\W^{-1}$ and $\invA$. Consider first the computation of the gradient. For the hinge-loss case $l^{h}_W$, each element $\delta_{i,j}$ of the gradient matrix \eqref{gradMtx} equals
+\begin{equation}
+    \delta_{(i,j)} = \sum\limits_{t\in \cal{T}}{ [\tfrac{1}{2}[(\vec{q}_{t})_i(\Delta\vec{p}_{t}\T)_j + (\Delta\vec{p}_{t}\T)_i(\vec{q}_{t})_j\T] } \cdot \textbf{1}(\lambda_{W}^t) - \alpha \cdot \W^{-1}_{i,j} + \beta \cdot \W_{i,j},
+\label{gradMatElem}
+\end{equation}
+where $\lambda_{W}^t \eqdef 1+\qt\T \W \Delta\p_{t}$ is the linear part a triplet loss
+
+For dense data, evaluating the sum over $T$ triplets costs $O(T)$ operations. However, for $gamma$-sparse data with a sparsity coefficient $ 0< \gamma <1 $, evaluating the sum in \eqref{gradMatElem} costs an average of $O(\gamma^2 T)$ operations, because we can accumulate only the elements that are both non-zeros in $(\vec{q}_{t})_i$ and in $(\Delta\vec{p}_{t}\T)_j  $ and likewise for $(\vec{q}_{t})_j$ and $(\Delta\vec{p}_{t}\T)_i$.   To efficiently evaluate the indicator functions $\{ \textbf{1}(\lambda_{W}^t) \}_{t \in T}$ on \eqref{gradMatElem}, we keep an array of the linear terms $\{\lambda_{W}^t\}_{t \in T}$. Computing all the gradient elements $\delta_{(k,1:d)}$ in a single row $k$ costs $O(d\cdot \gamma^2 T)$.
+Maintaining and updating $\W^{-1}$ and $\invA$, and computing the optimal step size following equations on Appendix B (in supplementary), each costs $O(d^2)$ operations. 
+To conclude, the total computational complexity per block-coordinate step is $O(\gamma^2 d T + d^2)$. When taking $Nd$ coordinate steps, the overall complexity of COMET is 
+\begin{equation}
+O(N \cdot (\gamma d)^2 T + N \cdot d^3)
+\label{cometComplexity}
+\end{equation}
+We found empirically that COMET converges within $N= 5 - 10$. As a comparison, consider using SGD or mini-batches for the objective of \eqref{hingelt} and projecting onto the PD cone every $P$ triplets ($P \ll T$), as proposed in \cite{OASIS,qian}. The computational complexity per data pass becomes $O((\gamma d)^2 T + \frac{T}{P} d^3)$. This approach is slower than COMET and only reaches the complexity of COMET when projections are very rare. For example, \citet{qian} used mini-batches of $P=10$ triplets. With a total of $T=100k$ triplets, yielding a computational complexity ~1000 times larger than COMET.
+
+Compare further with \citet{hdsl}. COMET’s complexity is better than HDSL. The fast heuristic version of HDSL is $O(M\gamma d+Tk)$ per coordinate step, where $M$ is the size of mini-batch, $k$ is the iteration number. This is summed over $k=1,...,O(d^2)$ iterations, since each HDSL step considers a single pair of features, updating 4 matrix entries as opposed to $2d-1$ entries in COMET. Overall, this yields $O(M\gamma d^3+Td^4)$ computations for HDSL, compared with \eqref{cometComplexity} of COMET. Since both $M$ and $N$ are typically small, this means HDSL is more costly than COMET by a factor of $\frac{d^2}{N}$. In our experiments, HDSL sometimes uses much less than $O(d^2)$ iterations, but then achieves a significantly inferior test error. We believe that HDSL would excel in cases where the true optimum is very sparse, and there is no need to go over the entire set of $d \choose 2$ coordinate pairs.
+
+Finally, we compare with the complexity of LEGO \cite{lego}. LEGO requires $O(d^2)$ computation per constraint. Thus for $N$ passes over $T$ triplets LEGO's complexity is $O(N\cdot d^2 \cdot T)$. Assuming an equal number of passes over the triplet, we find that COMET's complexity \eqref{cometComplexity} is asymptotically better than LEGO as long as $N \cdot T \cdot (1-\gamma^2) > d^2$. That is, whenever the data is even moderately sparse, and the number of triplets is larger than the number of matrix parameters.
+
+{\bf COMET Memory footprint}: Keeping the data triplets in memory takes $O(\gamma d T)$ elements and holding $\W$ and $\W^{-1}$ costs $O(d^2)$. The total memory usage is $O(\gamma d T + d^2)$. 
+
+\section*{Appendix D: Proofs and Lemmas}
+
+We first establish two auxiliary lemmas, then proceed to the proof of Theorem 1.
+\label{appendix-proofs}
+\begin{lemma}[Smooth objective]
+\label{lem:smooth}
+
+Let:
+
+$\tL=\sum\limits_{t\in T}{l_{\W + \kappa I}(\vec{q}_t, \vec{p}_{t}^{+}, \vec{p}_{t}^{-})} -
+\alpha \cdot \log \det(\W + \kappa I) + \tfrac{\beta}{2}  \cdot \| \W + \kappa I \|_{F}^{2}$, 
+where $l_{\W + \kappa I}$ is either the squared hinge loss or the log-loss, and $\tL$ is defined over the positive semidefininte cone. 
+Let $\Hh^i \in \R^{d \times d}$, $i=1 \ldots d$, be a symmetric matrix with non-zero entries only on the $i$-th row and column.
+For any $\W$ and $\Hh^i$ such that $\W + \Hh^i$ is PSD, there exists a positive constant $M_i$ such that:
+\begin{equation}
+\label{eq:ineq}
+\Delta L \leq  \langle \grd, \Hh^i \rangle + \frac{M_i}{2} \frobsq{\Hh^i} = \sum_{k,l=1}^d  \grdkl \Hh_{kl}^i + \frac{M_i}{2} \sum_{k,l=1}^d  (\Hh_{kl}^i)^2, \nonumber
+\end{equation}
+with the constant $M_i \leq  2 \sum_{t=1}^T (\qt_i^2 +{\Delta\vec{p}_{t}}_i^2) + \frac{\alpha d}{\kappa ^2} + \beta$ and $\Delta L = \tilde{L}(\W + \Hh^i) - \tL$.
+\end{lemma}
+\begin{proof}%[\bf{Proof of Lemma 1}]
+The objective $\tL$ is comprised of three terms: (1) the sum of loss terms, (2) the $\log \det$ term, and (3) the Frobenius regularization term. We will bound each of the separately, denoting the positive bounding constants $M^1_i$, $M^2_i$ and $M^3_i$, respectively. 
+%The Frobenius norm term ensures that $\tL$ is at least $\beta$ strongly-convex.
+
+Assuming the instances $\qt$ and $\pt$ are unit normalized, straightforward computation shows that for the term (1), inequality \ref{eq:ineq} holds true for $M^1_i \leq 2 \sum_{t=1}^T (\qt_i^2 +{\Delta\vec{p}_{t}}_i^2)$. %This means that if the features are more or less equally weighted, $M^1_i$ is very roughly on the order of $\frac{T}{d}$.
+
+To show that \ref{eq:ineq} is true for the $-\log \det$ term, we bound the maximal eigenvalue of its Hessian $\mathcal{H}$, which upper bounds $M_i^2$ by convexity and standard use of a Taylor expansion.
+The Hessian is a $d^2 \times d^2$ PSD matrix, due to convexity and twice-differentiability of $- \log \det$. At every point $\mat{X} = \W + \kappa I$, $\W \succ 0$, the Hessian $\mathcal{H}(\mat{X})$ defines a bilinear form $\mathcal{B}_{\mat{X}}\left(\mat{P},\mat{Q}\right)$ on the set of symmetric $d \times d$ matrices. This bilinear form is $\mathcal{B}_{\mat{X}}\left(\mat{P},\mat{Q}\right) = tr\left(\mat{X}^{-1}\mat{P} \mat{X}^{-1}\mat{Q}\right)$ \citep[Appendix A]{boyd2004convex}. We then have:
+\begin{align*}
+&\max eig(\mathcal{H}) = \max_{\|\mat{P}\|_F=1} \mathcal{B}_{\mat{X}}\left(\mat{P},\mat{P}\right) = \\
+&\max_{\|\mat{P}\|_F=1} tr\left(\mat{X}^{-1}\mat{P} \mat{X}^{-1}\mat{P}\right) \leq \\
+&\max_{\|\mat{P}\|_F=1} \|\mat{X}^{-1} \mat{P}\|_F^2 \leq \|\mat{X}^{-1}\|_F^2 \leq  \\
+& d \|\mat{X}^{-1}\|^2 = \frac{d}{\|\mat{X}\|^2} \leq \frac{d}{\kappa^2},
+\end{align*}
+where in the last line we denote the spectral norm (maximum singular value) of $\mat{X}$ by $\|\mat{X}\|$. The last inequality is due to the fact that $\mat{X} = \W + \kappa I$, $\W \succ 0$.
+We therefore have a bound $M^2_i \leq \frac{\alpha d}{\kappa^2}$.
+
+Finally, the constant $M^3_{i}$ for the Frobenius regularization is immediately seen to be $\beta$.
+
+Collecting all the terms together, we obtain an overall bound on the constant: $M_i \leq M^1_{i} + M^2_{i} + M^3_{i} \leq  M^1_{i} + \frac{\alpha d}{\kappa ^2} + \beta$.
+\end{proof}
+
+Let us define a matrix $\Pp \in \R^{d \times d}$ such that $\Pp_{ij} = p_i + p_j$ for $i \ne j$, $\Pp_{ii} = p_i$. $\Pp$ is defined such that $\Pp_{ij}$ is the probability of updating the $(i,j)$ entry of the matrix $\W$ at any given iteration. To show our method converges in a linear rate, we must show that $\tL$, $\Pp$ and the constants $M_i$ satisfy the ``Expected Separable Overapproximation'' assumption presented by \citet{richtarik2013optimal}:
+
+\begin{lemma}[Expected Separable Overapproximation]\label{lem:ESO}
+For any symmetric $\Hh \in \R^{d \times d}$ such that $\W + \Hh$ is PSD, let $\Hh^i \in \R^{d \times d}$, $i=1 \ldots d$ be identical to $\Hh$ on the $i$-th row and column, and $0$ elsewhere. Then:
+\begin{equation}
+\mathbb{E}_{i \sim Mult(p_1, \ldots, p_d)} \left[ \tilde{L}(\W + \Hh^i) \right] \leq 
+\tL + \sum_{k,l=1}^d  \grdkl \Hh_{kl} \Pp_{kl} + \frac{1}{2} \sum_{k,l=1}^d   M_k (\Hh_{kl})^2 \Pp_{kl},
+\end{equation}
+where $i$ is sampled from a multinomial distribution with parameters $(p_1, \ldots , p_d)$.
+\end{lemma}
+
+\begin{proof}%[\bf{Proof of Lemma 2}]
+\begin{align*}
+&\mathbb{E}_{i \sim Mult(p_1, \ldots, p_d)} \left[ \tilde{L}(\W + \Hh^i) \right] =\sum_{i=1}^d p_i \tilde{L}(\W + \Hh^i) \stackrel{(a)}{\leq} \\
+& \sum_{i=1}^d p_i \left(\tL + \sum_{k,l=1}^d \grdkl \Hh_{kl}^i + \frac{M_i}{2} \sum_{k,l=1}^d  (\Hh_{kl}^i)^2 \right) \stackrel{(b)}{=} \\
+& \tL + \sum_{k,l=1}^d \grdkl \sum_{i=1}^d  p_i \Hh_{kl}^i + \sum_{k,l=1}^d  \sum_{i=1}^d  p_i \frac{M_i}{2} (\Hh_{kl}^i)^2  \stackrel{(c)}{=} \\
+& \tL + \sum_{k,l=1}^d \grdkl \Hh_{kl} \Pp_{kl} + \frac{1}{2} \sum_{k,l=1}^d M_k (\Hh_{kl})^2 \Pp_{kl}.
+\end{align*}
+Inequality (a) is due to Lemma \ref{lem:smooth}. Equality (b) is by changing the order of summation and since the $p_i$ sum to 1. Equality (c) is by a simple counting argument, and the fact that $\Hh^i$ is the restriction of $\Hh$ to its $i$-th row and column. Each off-diagonal element $\Hh_{kl}$ appears twice in the sum over $i$: when $i=k$ and $i=l$. This is accounted for by the elements $\Pp_{kl} = p_k + p_l$.
+\end{proof}
+
+\begin{theorem}
+Let $\W^t$ be the $t$-th iterate of Algorithm \ref{alg:comet} with objective function $\tL$, sampling each column-row $i$ with probability $p_i$ and using step sizes $\eta_i \leq \frac{1}{M_i}$. Let $\tilde{L}^*$ be the optimal value of $\tL$ on the PD cone. Let $\beta^* \geq \beta$ be the strong convexity parameter of $\tL$, $M^1 = \max_i M^1_i$, $\Lambda = \max_i \frac{1}{p_i}$, $\rho >0, \epsilon>0$, and $W^t$ the $t$ iterate of Algorithm \ref{alg:comet}.
+
+If $t > \frac{\Lambda (M^1 + \alpha d (1/\kappa)^2 + \beta)}{\beta^*} log \left( \frac{\tilde{L}(W^0) - \tilde{L}^*}{\epsilon \rho}\right)$ then: $Prob(\tilde{L}(\W^k) - \tilde{L}^* \leq \epsilon) \geq 1-\rho$.
+\end{theorem}
+\begin{proof}%[\bf{Proof of Theorem 1}]
+We show that Algorithm \ref{alg:comet} with objective function $\tL$\footnote{With squared-hinge loss or log loss.}, sampling each column-row $i$ with probability $p_i >0$, and using step sizes $\eta_i \leq \frac{1}{M_i}$, follows Assumption 1 and Assumption 2 of \citet{richtarik2013optimal}. From this the convergence result follows from \citeauthor[Theorem 3]{richtarik2013optimal}, plugging in our bounds regarding the smoothness and strong convexity of $\tL$.
+
+We first note that our algorithm is indeed a special case of the algorithm presented in \citet{richtarik2013optimal}. Specifically, our algorithm assigns probability $p_i > 0 $ to each of the $d$ column-rows of a matrix, and probability $0$ to every other possible choice of coordinates. We update along this block, and the $\log \det$ term acts as a barrier function
+assuring us we will stay within the PD cone.
+
+Lemma \ref{lem:ESO} shows our objective is smooth and satisfies Assumption 1 of \citeauthor{richtarik2013optimal}. Assumption 2 of \citeauthor{richtarik2013optimal} is immediately satisfied because of the Frobenius regularization term, ensuring a strong convexity term $\beta^* \geq \beta > 0$. The result follows by considering that the probability $\Pp_{ij}$ of updating coordinate $(i,j)$ obeys $\Pp_{ij} \geq \min_i p_i $ and the values of $M_i$ given in Lemma \ref{lem:smooth}.
+
+\end{proof}
+
+
+
+
+
+\section*{Appendix E: Results for Reuters CV1 1K features, Caltech256 249 categories and Protein}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=7cm]{precision@k_rcv1_4_ig1000}
+\caption*{\textit{precision-at-top-k} for REUTERS CV1 dataset with 1000 features}
+
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=7cm]{precision@k_protein}
+\caption*{\textit{precision-at-top-k} for Protein (LIBSVM) dataset with 357 features}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=7cm]{precision@k_Caltech256_with_249Categories}
+\caption*{\textit{precision-at-top-k} for Caltech256 (249 Categories) dataset with 1000 features}
+\end{figure}
+
+\newpage
+\small{
+\bibliography{comet_supp}
+%\bibliographystyle{icml2015}
+}
+
+
+%\input{comet_NIPS_Supplementary}
 
 \end{document}
